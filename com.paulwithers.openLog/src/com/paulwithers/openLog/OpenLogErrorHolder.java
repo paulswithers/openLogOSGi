@@ -19,7 +19,7 @@ package com.paulwithers.openLog;
  */
 
 import java.io.Serializable;
-import java.util.TreeSet;
+import java.util.HashSet;
 
 import javax.faces.component.UIComponent;
 
@@ -32,19 +32,21 @@ import com.ibm.jscript.InterpretException;
  */
 public class OpenLogErrorHolder implements Serializable {
 
-	private TreeSet<EventError> errors;
-	private TreeSet<EventError> events;
+	// Changed from using TreeSet because there is a bug with that. If compareTo returns 0, because it implements TreeMap,
+	//it can still consider them equal, and ignore them - http://blog.tremend.ro/2007/05/17/problem-when-adding-elements-to-a-treesetcomparator-some-elements-are-not-added/
+	private HashSet<EventError> errors;
+	private HashSet<EventError> events;
 	private static final long serialVersionUID = 1L;
 
 	public OpenLogErrorHolder() {
 
 	}
 
-	public TreeSet<EventError> getErrors() {
+	public HashSet<EventError> getErrors() {
 		return errors;
 	}
 
-	public TreeSet<EventError> getEvents() {
+	public HashSet<EventError> getEvents() {
 		return events;
 	}
 
@@ -276,7 +278,7 @@ public class OpenLogErrorHolder implements Serializable {
 	 */
 	private void addToErrorsList(EventError newErr) {
 		if (null == getErrors()) {
-			errors = new TreeSet<EventError>();
+			errors = new HashSet<EventError>();
 		}
 		errors.add(newErr);
 	}
@@ -379,7 +381,7 @@ public class OpenLogErrorHolder implements Serializable {
 	 */
 	private void addToEventsList(EventError newEv) {
 		if (null == getEvents()) {
-			events = new TreeSet<EventError>();
+			events = new HashSet<EventError>();
 		}
 		events.add(newEv);
 	}
@@ -445,7 +447,6 @@ public class OpenLogErrorHolder implements Serializable {
 		}
 
 		public int compareTo(Object other) {
-			// TODO Auto-generated method stub
 			int retVal = 0;
 			if (!this.getMsg().equals(((EventError) other).getMsg())) {
 				return retVal;

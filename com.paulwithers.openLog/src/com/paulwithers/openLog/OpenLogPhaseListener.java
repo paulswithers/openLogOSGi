@@ -19,6 +19,7 @@ package com.paulwithers.openLog;
  */
 
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.faces.FacesException;
 import javax.faces.context.FacesContext;
@@ -26,8 +27,12 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 
+import lotus.domino.Database;
+import lotus.domino.Document;
+
 import com.ibm.jscript.InterpretException;
 import com.ibm.xsp.exception.EvaluationExceptionEx;
+import com.ibm.xsp.extlib.util.ExtLibUtil;
 import com.paulwithers.openLog.OpenLogErrorHolder.EventError;
 
 /**
@@ -74,24 +79,75 @@ public class OpenLogPhaseListener implements PhaseListener {
 						// FacesException, so error is on event
 						FacesException fe = (FacesException) error;
 						EvaluationExceptionEx ee = (EvaluationExceptionEx) fe.getCause();
+						InterpretException ie = (InterpretException) ee.getCause();
 						String msg = "";
 						msg = "Error on " + ee.getErrorComponentId() + " " + ee.getErrorPropertyId()
-								+ " property/value:\n\n" + ee.getErrorText();
+								+ " property/value:\n\n" + Integer.toString(ie.getErrorLine() + 1) + ":\n\n"
+								+ ie.getLocalizedMessage() + "\n\n" + ie.getExpressionText();
 						OpenLogItem.logErrorEx(ee, msg, null, null);
 					}
 
 				} else if (null != r.get("openLogBean")) {
 					// requestScope.openLogBean is not null, the developer has called openLogBean.addError(e,this)
 					OpenLogErrorHolder errList = (OpenLogErrorHolder) r.get("openLogBean");
-					// loop through the ArrayList of InnerError objects
-					for (EventError error : errList.getErrors()) {
-						String msg = "Error on ";
-						if (null != error.getControl()) {
-							msg = msg + error.getControl().getId();
+					// loop through the ArrayList of EventError objects
+					if (null != errList.getErrors()) {
+						for (EventError error : errList.getErrors()) {
+							String msg = "";
+							if (!"".equals(error.getMsg())) msg = msg + error.getMsg();
+							msg = msg + "Error on ";
+							if (null != error.getControl()) {
+								msg = msg + error.getControl().getId();
+							}
+							if (null != error.getError()) {
+								msg = msg + ":\n\n" + error.getError().getLocalizedMessage() + "\n\n"
+										+ error.getError().getExpressionText();
+							}
+							Level severity = convertSeverity(error.getSeverity());
+							Document passedDoc = null;
+							if (!"".equals(error.getUnid())) {
+								try {
+									Database currDb = ExtLibUtil.getCurrentDatabase();
+									passedDoc = currDb.getDocumentByUNID(error.getUnid());
+								} catch (Exception e) {
+									msg = msg + "\n\nCould not retrieve document but UNID was passed: "
+											+ error.getUnid();
+								}
+							}
+							OpenLogItem.logErrorEx(error.getError(), msg, severity, passedDoc);
+							try {
+								passedDoc.recycle();
+							} catch (Throwable e) {
+								// nothing to recycle here, move along
+							}
 						}
-						msg = msg + ":\n\n" + error.getError().getLocalizedMessage() + "\n\n"
-								+ error.getError().getExpressionText();
-						OpenLogItem.logErrorEx(error.getError(), msg, null, null);
+					}
+					// loop through the ArrayList of EventError objects
+					if (null != errList.getEvents()) {
+						for (EventError eventObj : errList.getEvents()) {
+							String msg = "Event logged for ";
+							if (null != eventObj.getControl()) {
+								msg = msg + eventObj.getControl().getId();
+							}
+							msg = msg + eventObj.getMsg();
+							Level severity = convertSeverity(eventObj.getSeverity());
+							Document passedDoc = null;
+							if (!"".equals(eventObj.getUnid())) {
+								try {
+									Database currDb = ExtLibUtil.getCurrentDatabase();
+									passedDoc = currDb.getDocumentByUNID(eventObj.getUnid());
+								} catch (Exception e) {
+									msg = msg + "\n\nCould not retrieve document but UNID was passed: "
+											+ eventObj.getUnid();
+								}
+							}
+							OpenLogItem.logEvent(null, msg, severity, passedDoc);
+							try {
+								passedDoc.recycle();
+							} catch (Throwable e) {
+								// nothing to recycle here, move along
+							}
+						}
 					}
 				}
 			}
@@ -99,6 +155,33 @@ public class OpenLogPhaseListener implements PhaseListener {
 			// We've hit an error in our code here, log the error
 			OpenLogItem.logError(e);
 		}
+	}
+
+	private Level convertSeverity(int severity) {
+		Level internalLevel = null;
+		switch (severity) {
+		case 1:
+			internalLevel = Level.SEVERE;
+			break;
+		case 2:
+			internalLevel = Level.WARNING;
+			break;
+		case 3:
+			internalLevel = Level.INFO;
+			break;
+		case 5:
+			internalLevel = Level.FINE;
+			break;
+		case 6:
+			internalLevel = Level.FINER;
+			break;
+		case 7:
+			internalLevel = Level.FINEST;
+			break;
+		default:
+			internalLevel = Level.CONFIG;
+		}
+		return internalLevel;
 	}
 
 	public PhaseId getPhaseId() {
