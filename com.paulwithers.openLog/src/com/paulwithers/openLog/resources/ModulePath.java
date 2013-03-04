@@ -1,5 +1,5 @@
 /*
- * © Copyright GBS Inc 2011
+ * ï¿½ Copyright GBS Inc 2011
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -17,8 +17,8 @@ package com.paulwithers.openLog.resources;
 
 
 import com.ibm.xsp.resource.DojoModulePathResource;
+import com.paulwithers.openLog.Activator;
 import com.paulwithers.openLog.library.StarterLibrary;
-import com.paulwithers.openLog.starter.Activator;
 
 public class ModulePath extends DojoModulePathResource {
 	public final static String NAMESPACE = StarterLibrary.LIBRARY_RESOURCE_NAMESPACE;

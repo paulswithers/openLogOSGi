@@ -1,5 +1,5 @@
 /*
- * © Copyright GBS Inc 2011
+ * ï¿½ Copyright GBS Inc 2011
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -17,7 +17,7 @@ package com.paulwithers.openLog.library;
 
 
 import com.ibm.xsp.library.AbstractXspLibrary;
-import com.paulwithers.openLog.starter.Activator;
+import com.paulwithers.openLog.Activator;
 
 public class StarterLibrary extends AbstractXspLibrary {
 	private final static String LIBRARY_ID = StarterLibrary.class.getName();

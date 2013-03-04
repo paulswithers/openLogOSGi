@@ -1,5 +1,5 @@
 /*
- * © Copyright GBS Inc 2011
+ * ï¿½ Copyright GBS Inc 2011
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.ibm.xsp.webapp.FacesResourceServlet;
 import com.ibm.xsp.webapp.resources.BundleResourceProvider;
 import com.ibm.xsp.webapp.resources.URLResourceProvider;
-import com.paulwithers.openLog.starter.Activator;
+import com.paulwithers.openLog.Activator;
 import com.paulwithers.openLog.util.LibraryUtils;
 
 public class ResourceProvider extends BundleResourceProvider {

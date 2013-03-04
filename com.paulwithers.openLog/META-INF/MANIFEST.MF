@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: OpenLog for XPages
 Bundle-SymbolicName: com.paulwithers.openLog;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.paulwithers.openLog.starter.Activator
+Bundle-Activator: com.paulwithers.openLog.Activator
 Bundle-Vendor: PaulWithers
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.ibm.commons.util,
@@ -26,7 +26,6 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.paulwithers.openLog,
  com.paulwithers.openLog.implicit,
  com.paulwithers.openLog.resources,
- com.paulwithers.openLog.starter,
  com.paulwithers.openLog.util
 Require-Bundle: com.ibm.xsp.designer;bundle-version="8.5.3",
  com.ibm.xsp.extlib;bundle-version="8.5.3"

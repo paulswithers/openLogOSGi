@@ -19,7 +19,7 @@ package com.paulwithers.openLog;
  */
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import javax.faces.component.UIComponent;
 
@@ -34,19 +34,19 @@ public class OpenLogErrorHolder implements Serializable {
 
 	// Changed from using TreeSet because there is a bug with that. If compareTo returns 0, because it implements TreeMap,
 	//it can still consider them equal, and ignore them - http://blog.tremend.ro/2007/05/17/problem-when-adding-elements-to-a-treesetcomparator-some-elements-are-not-added/
-	private HashSet<EventError> errors;
-	private HashSet<EventError> events;
+	private LinkedHashSet<EventError> errors;
+	private LinkedHashSet<EventError> events;
 	private static final long serialVersionUID = 1L;
 
 	public OpenLogErrorHolder() {
 
 	}
 
-	public HashSet<EventError> getErrors() {
+	public LinkedHashSet<EventError> getErrors() {
 		return errors;
 	}
 
-	public HashSet<EventError> getEvents() {
+	public LinkedHashSet<EventError> getEvents() {
 		return events;
 	}
 
@@ -278,7 +278,7 @@ public class OpenLogErrorHolder implements Serializable {
 	 */
 	private void addToErrorsList(EventError newErr) {
 		if (null == getErrors()) {
-			errors = new HashSet<EventError>();
+			errors = new LinkedHashSet<EventError>();
 		}
 		errors.add(newErr);
 	}
@@ -381,7 +381,7 @@ public class OpenLogErrorHolder implements Serializable {
 	 */
 	private void addToEventsList(EventError newEv) {
 		if (null == getEvents()) {
-			events = new HashSet<EventError>();
+			events = new LinkedHashSet<EventError>();
 		}
 		events.add(newEv);
 	}
@@ -391,7 +391,59 @@ public class OpenLogErrorHolder implements Serializable {
 	 * @since 1.0.0
 	 * 
 	 */
-	public class EventError implements Serializable, Comparable {
+	public class EventError implements Serializable {
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((control == null) ? 0 : control.hashCode());
+			result = prime * result + ((msg == null) ? 0 : msg.hashCode());
+			result = prime * result + severity;
+			result = prime * result + ((unid == null) ? 0 : unid.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			EventError other = (EventError) obj;
+			if (!getOuterType().equals(other.getOuterType())) return false;
+			if (control == null) {
+				if (other.control != null) return false;
+			} else if (!control.equals(other.control)) return false;
+			if (msg == null) {
+				if (other.msg != null) return false;
+			} else if (!msg.equals(other.msg)) return false;
+			if (severity != other.severity) return false;
+			if (unid == null) {
+				if (other.unid != null) return false;
+			} else if (!unid.equals(other.unid)) return false;
+
+			String srcMsg = "";
+			String srcText = "";
+			String otherMsg = "";
+			String otherText = "";
+			if (null != this.getError()) {
+				srcMsg = this.getError().getLocalizedMessage();
+				srcText = this.getError().getExpressionText();
+			}
+			InterpretException otherErr = (other).getError();
+			if (null != otherErr) {
+				otherMsg = otherErr.getLocalizedMessage();
+				otherText = otherErr.getExpressionText();
+			}
+			if (!srcMsg.equals(otherMsg)) {
+				return false;
+			}
+			if (!srcText.equals(otherText)) {
+				return false;
+			}
+			return true;
+		}
+
 		/**
 		 *
 		 */
@@ -446,34 +498,8 @@ public class OpenLogErrorHolder implements Serializable {
 			this.unid = unid;
 		}
 
-		public int compareTo(Object other) {
-			int retVal = 0;
-			if (!this.getMsg().equals(((EventError) other).getMsg())) {
-				return retVal;
-			}
-			if (this.getSeverity() != ((EventError) other).getSeverity()) {
-				return retVal;
-			}
-			if (!this.getUnid().equals(((EventError) other).getUnid())) {
-				return retVal;
-			}
-			String srcMsg = "";
-			String srcText = "";
-			String otherMsg = "";
-			String otherText = "";
-			if (null != this.getError()) {
-				srcMsg = this.getError().getLocalizedMessage();
-				srcText = this.getError().getExpressionText();
-			}
-			InterpretException otherErr = ((EventError) other).getError();
-			if (null != otherErr) {
-				otherMsg = otherErr.getLocalizedMessage();
-				otherText = otherErr.getExpressionText();
-			}
-			if (srcMsg.equals(otherMsg) && srcText.equals(otherText)) {
-				return retVal;
-			}
-			return 1;
+		private OpenLogErrorHolder getOuterType() {
+			return OpenLogErrorHolder.this;
 		}
 
 	}

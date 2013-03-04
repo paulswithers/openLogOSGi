@@ -10,6 +10,7 @@ import com.ibm.xsp.util.ValueBindingUtil;
 public class StarterELBindingFactoryImpl implements BindingFactory {
 	private final static String _prefix = "starter";
 
+	@SuppressWarnings("unchecked")
 	public MethodBinding createMethodBinding(Application arg0, String arg1, Class[] arg2) {
 		String str = ValueBindingUtil.parseSimpleExpression(arg1);
 		return new StarterMethodBinding(str);
