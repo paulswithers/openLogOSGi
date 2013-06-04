@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.paulwithers.openLog.feature"
+      label="OpenLog Feature"
+      version="2.0.0"
+      provider-name="paulwithers">
+
+   <description url="https://github.com/paulswithers/openlogosgi">
+      OSGi plugin for com.paulwithers.openlog
+   </description>
+
+   <copyright url="https://github.com/paulswithers/openlogosgi">
+      Copyright Paul Withers 2013
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <plugin
+         id="com.paulwithers.openLog"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
