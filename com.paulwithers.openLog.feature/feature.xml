@@ -2,7 +2,7 @@
 <feature
       id="com.paulwithers.openLog.feature"
       label="OpenLog Feature"
-      version="2.0.0"
+      version="2.0.1"
       provider-name="paulwithers">
 
    <description url="https://github.com/paulswithers/openlogosgi">

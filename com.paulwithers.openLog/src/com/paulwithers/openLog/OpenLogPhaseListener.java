@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import javax.faces.FacesException;
 import javax.faces.context.FacesContext;
+import javax.faces.el.PropertyNotFoundException;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
@@ -32,6 +33,7 @@ import lotus.domino.Database;
 import lotus.domino.Document;
 
 import com.ibm.jscript.InterpretException;
+import com.ibm.xsp.FacesExceptionEx;
 import com.ibm.xsp.exception.EvaluationExceptionEx;
 import com.ibm.xsp.extlib.util.ExtLibUtil;
 import com.paulwithers.openLog.OpenLogErrorHolder.EventError;
@@ -94,8 +96,21 @@ public class OpenLogPhaseListener implements PhaseListener {
 						OpenLogItem.logErrorEx(ee, msg, null, null);
 
 					} else if ("javax.faces.FacesException".equals(error.getClass().getName())) {
-						// FacesException, so error is on event
+						// FacesException, so error is on event or getValue from com.ibm.xsp.model.domino.wrapped.DominoDocument
 						FacesException fe = (FacesException) error;
+						String msg = "Error on ";
+						if ("com.ibm.xsp.exception.EvaluationExceptionEx".equals(fe.getCause().getClass().getName())) {
+							EvaluationExceptionEx ee = (EvaluationExceptionEx) fe.getCause();
+							msg = msg + ee.getErrorComponentId() + " " + ee.getErrorPropertyId()
+									+ " property/event:\n\n";
+						}
+						InterpretException ie = (InterpretException) fe.getCause().getCause();
+						msg = msg + Integer.toString(ie.getErrorLine()) + ":\n\n" + ie.getLocalizedMessage() + "\n\n"
+								+ ie.getExpressionText();
+						OpenLogItem.logErrorEx(fe.getCause(), msg, null, null);
+					} else if ("com.ibm.xsp.FacesExceptionEx".equals(error.getClass().getName())) {
+						// FacesException, so error is on event
+						FacesExceptionEx fe = (FacesExceptionEx) error;
 						EvaluationExceptionEx ee = (EvaluationExceptionEx) fe.getCause();
 						InterpretException ie = (InterpretException) ee.getCause();
 						String msg = "";
@@ -103,6 +118,21 @@ public class OpenLogPhaseListener implements PhaseListener {
 								+ " property/event:\n\n" + Integer.toString(ie.getErrorLine()) + ":\n\n"
 								+ ie.getLocalizedMessage() + "\n\n" + ie.getExpressionText();
 						OpenLogItem.logErrorEx(ee, msg, null, null);
+					} else if ("javax.faces.el.PropertyNotFoundException".equals(error.getClass().getName())) {
+						// Property not found exception, so error is on a component property
+						PropertyNotFoundException pe = (PropertyNotFoundException) error;
+						String msg = "";
+						msg = "PropertyNotFounException Error, cannot locate component:\n\n" + pe.getLocalizedMessage();
+						OpenLogItem.logErrorEx(pe, msg, null, null);
+					} else {
+						try {
+							System.out.println("Error type not found:" + error.getClass().getName());
+							String msg = "";
+							msg = error.toString();
+							OpenLogItem.logErrorEx((Throwable) error, msg, null, null);
+						} catch (Throwable t) {
+							t.printStackTrace();
+						}
 					}
 
 				} else if (null != r.get("openLogBean")) {

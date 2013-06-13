@@ -97,6 +97,7 @@ import lotus.domino.NotesException;
 import lotus.domino.RichTextItem;
 import lotus.domino.Session;
 
+import com.ibm.commons.util.StringUtil;
 import com.ibm.xsp.application.ApplicationEx;
 import com.ibm.xsp.extlib.util.ExtLibUtil;
 
@@ -661,7 +662,7 @@ public class OpenLogItem implements Serializable {
 	private static String getIniVar(String propertyName, String defaultValue) {
 		try {
 			String newVal = getSession().getEnvironmentString(propertyName, true);
-			if (!"".equals(newVal)) {
+			if (StringUtil.isEmpty(newVal)) {
 				return newVal;
 			} else {
 				return defaultValue;
@@ -990,6 +991,10 @@ public class OpenLogItem implements Serializable {
 				errMsg = "Expression Language Interpret Exception " + ie.getExpressionText();
 			} else {
 				errMsg = ee.getMessage();
+			}
+
+			if (null == errMsg) {
+				errMsg = getMessage();
 			}
 
 			logDoc.replaceItemValue("LogErrorMessage", errMsg);
