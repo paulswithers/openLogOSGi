@@ -201,6 +201,7 @@ public class OpenLogItem implements Serializable {
 	// so they'll be null on a restore
 	private transient static Session _session;
 	private transient static Database _logDb;
+	private transient static String _logEmail;
 	private transient static Database _currentDatabase;
 	private transient static DateTime _startTime;
 	private transient static DateTime _eventTime;
@@ -463,6 +464,16 @@ public class OpenLogItem implements Serializable {
 	/**
 	 * @return the logDbName
 	 */
+	public static String getLogEmail() {
+		if (StringUtil.isEmpty(_logEmail)) {
+			_logEmail = getXspProperty("xsp.openlog.email", "");
+		}
+		return _logEmail;
+	}
+
+	/**
+	 * @return the logDbName
+	 */
 	public static String getLogDbName() {
 		if ("".equals(_logDbName)) {
 			_logDbName = getXspProperty("xsp.openlog.filepath", "OpenLog.nsf");
@@ -622,7 +633,7 @@ public class OpenLogItem implements Serializable {
 	// 0 -- internal errors are discarded
 	// 1 -- Exception messages from internal errors are printed
 	// 2 -- stack traces from internal errors are also printed
-	public static String olDebugLevel = getXspProperty("xsp.openlog.debugLevel", "2");
+	public static transient String olDebugLevel = getXspProperty("xsp.openlog.debugLevel", "2");
 
 	// debugOut is the PrintStream that errors will be printed to, for debug
 	// levels
@@ -963,19 +974,25 @@ public class OpenLogItem implements Serializable {
 	 */
 	public static boolean writeToLog() {
 		// exit early if there is no database
-		Database db = getLogDb();
-		if (db == null) {
-			System.out.println("Could not retrieve database at path " + getLogDbName());
-			return false;
-		}
-
+		Database db = null;
 		boolean retval = false;
 		Document logDoc = null;
 		RichTextItem rtitem = null;
 		Database docDb = null;
 
 		try {
+			if (StringUtil.isEmpty(getLogEmail())) {
+				db = getLogDb();
+			} else {
+				db = getSession().getDatabase(getThisServer(), "mail.box", false);
+			}
+			if (db == null) {
+				System.out.println("Could not retrieve database at path " + getLogDbName());
+				return false;
+			}
+
 			logDoc = db.createDocument();
+			rtitem = logDoc.createRichTextItem("LogDocInfo");
 
 			logDoc.appendItemValue("Form", _logFormName);
 
@@ -1003,7 +1020,13 @@ public class OpenLogItem implements Serializable {
 			logDoc.replaceItemValue("LogSeverity", getSeverity().getName());
 			logDoc.replaceItemValue("LogEventTime", getEventTime());
 			logDoc.replaceItemValue("LogEventType", getEventType());
-			logDoc.replaceItemValue("LogMessage", getMessage());
+			// If greater than 32k, put in logDocInfo
+			if (getMessage().length() > 32000) {
+				rtitem.appendText(getMessage());
+				rtitem.addNewLine();
+			} else {
+				logDoc.replaceItemValue("LogMessage", getMessage());
+			}
 			logDoc.replaceItemValue("LogFromDatabase", getThisDatabase());
 			logDoc.replaceItemValue("LogFromServer", getThisServer());
 			logDoc.replaceItemValue("LogFromAgent", getThisAgent());
@@ -1018,7 +1041,6 @@ public class OpenLogItem implements Serializable {
 
 			if (getErrDoc() != null) {
 				docDb = getErrDoc().getParentDatabase();
-				rtitem = logDoc.createRichTextItem("LogDocInfo");
 				rtitem.appendText("The document associated with this event is:");
 				rtitem.addNewLine(1);
 				rtitem.appendText("Server: " + docDb.getServer());
@@ -1036,10 +1058,13 @@ public class OpenLogItem implements Serializable {
 			// make sure Depositor-level users can add documents too
 			logDoc.appendItemValue("$PublicAccess", "1");
 
+			if (StringUtil.isNotEmpty(getLogEmail())) {
+				logDoc.replaceItemValue("Recipients", getLogEmail());
+			}
 			logDoc.save(true);
 			retval = true;
-		} catch (Exception e) {
-			debugPrint(e);
+		} catch (Throwable t) {
+			debugPrint(t);
 			retval = false;
 		} finally {
 			// recycle all the logDoc objects when we're done with them
