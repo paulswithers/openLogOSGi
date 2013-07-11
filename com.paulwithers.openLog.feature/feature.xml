@@ -2,15 +2,14 @@
 <feature
       id="com.paulwithers.openLog.feature"
       label="OpenLog Feature"
-      version="3.0.0"
-      provider-name="paulwithers">
+      version="3.0.0.qualifier">
 
-   <description url="https://github.com/paulswithers/openlogosgi">
-      OSGi plugin for com.paulwithers.openlog
+   <description url="http://www.example.com/description">
+      [Enter Feature Description here.]
    </description>
 
-   <copyright url="https://github.com/paulswithers/openlogosgi">
-      Copyright Paul Withers 2013
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
    </copyright>
 
    <license url="http://www.example.com/license">

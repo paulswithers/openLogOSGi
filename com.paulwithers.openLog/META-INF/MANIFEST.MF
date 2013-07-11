@@ -19,7 +19,6 @@ Import-Package: com.ibm.commons.util,
  javax.faces.context,
  javax.faces.webapp,
  javax.servlet;version="2.5.0",
- lotus.domino,
  org.eclipse.core.runtime,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
