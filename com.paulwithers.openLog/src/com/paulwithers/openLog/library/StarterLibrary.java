@@ -15,7 +15,6 @@
  */
 package com.paulwithers.openLog.library;
 
-
 import com.ibm.xsp.library.AbstractXspLibrary;
 import com.paulwithers.openLog.Activator;
 
@@ -49,21 +48,20 @@ public class StarterLibrary extends AbstractXspLibrary {
 
 	@Override
 	public String[] getDependencies() {
-		return new String[] { "com.ibm.xsp.core.library",
-				"com.ibm.xsp.extsn.library", "com.ibm.xsp.domino.library",
-				"com.ibm.xsp.designer.library", "com.ibm.xsp.extlibx.library" };
+		return new String[] { "com.ibm.xsp.core.library", "com.ibm.xsp.extsn.library", "com.ibm.xsp.domino.library",
+				"com.ibm.xsp.designer.library", "com.ibm.xsp.extlib.library" };
 	}
 
 	@Override
 	public String[] getXspConfigFiles() {
-		String[] files = new String[] { "META-INF/starter.xsp-config"};
+		String[] files = new String[] { "META-INF/starter.xsp-config" };
 
 		return files;
 	}
 
 	@Override
 	public String[] getFacesConfigFiles() {
-		String[] files = new String[] { "META-INF/starter-faces-config.xml"};
+		String[] files = new String[] { "META-INF/starter-faces-config.xml" };
 		return files;
 	}
 
