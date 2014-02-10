@@ -18,6 +18,7 @@ package com.paulwithers.openLog;
 
  */
 
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ import javax.faces.event.PhaseListener;
 
 import lotus.domino.Database;
 import lotus.domino.Document;
+import lotus.domino.NotesException;
 
 import com.ibm.jscript.InterpretException;
 import com.ibm.xsp.FacesExceptionEx;
@@ -50,16 +52,19 @@ public class OpenLogPhaseListener implements PhaseListener {
 	@SuppressWarnings("unchecked")
 	public void beforePhase(PhaseEvent event) {
 		// Add FacesContext messages for anything captured so far
+		System.out.println(this.getClass().getName() + ": " + event.getPhaseId().toString());
 		if (RENDER_RESPONSE == event.getPhaseId().getOrdinal()) {
 			Map<String, Object> r = FacesContext.getCurrentInstance().getExternalContext().getRequestMap();
 			if (null == r.get("error")) {
 				OpenLogItem.setThisAgent(true);
 			}
 			if (null != r.get("openLogBean")) {
-				// requestScope.openLogBean is not null, the developer has called openLogBean.addError(e,this)
+				// requestScope.openLogBean is not null, the developer has
+				// called openLogBean.addError(e,this)
 				OpenLogErrorHolder errList = (OpenLogErrorHolder) r.get("openLogBean");
 				errList.setLoggedErrors(new LinkedHashSet<EventError>());
-				// loop through the ArrayList of EventError objects and add any errors already captured as a facesMessage
+				// loop through the ArrayList of EventError objects and add any
+				// errors already captured as a facesMessage
 				if (null != errList.getErrors()) {
 					for (EventError error : errList.getErrors()) {
 						errList.addFacesMessageForError(error);
@@ -71,8 +76,9 @@ public class OpenLogPhaseListener implements PhaseListener {
 
 	/*
 	 * (non-Javadoc)
-	 *
-	 * @see javax.faces.event.PhaseListener#afterPhase(javax.faces.event.PhaseEvent)
+	 * 
+	 * @see
+	 * javax.faces.event.PhaseListener#afterPhase(javax.faces.event.PhaseEvent)
 	 */
 	@SuppressWarnings("unchecked")
 	public void afterPhase(PhaseEvent event) {
@@ -83,13 +89,15 @@ public class OpenLogPhaseListener implements PhaseListener {
 					processUncaughtException(r);
 
 				} else if (null != r.get("openLogBean")) {
-					// requestScope.openLogBean is not null, the developer has called openLogBean.addError(e,this)
+					// requestScope.openLogBean is not null, the developer has
+					// called openLogBean.addError(e,this)
 					OpenLogErrorHolder errList = (OpenLogErrorHolder) r.get("openLogBean");
 					// loop through the ArrayList of EventError objects
 					if (null != errList.getErrors()) {
 						for (EventError error : errList.getErrors()) {
 							String msg = "";
-							if (!"".equals(error.getMsg())) msg = msg + error.getMsg();
+							if (!"".equals(error.getMsg()))
+								msg = msg + error.getMsg();
 							msg = msg + "Error on ";
 							if (null != error.getControl()) {
 								msg = msg + error.getControl().getId();
@@ -105,8 +113,7 @@ public class OpenLogPhaseListener implements PhaseListener {
 									Database currDb = ExtLibUtil.getCurrentDatabase();
 									passedDoc = currDb.getDocumentByUNID(error.getUnid());
 								} catch (Exception e) {
-									msg = msg + "\n\nCould not retrieve document but UNID was passed: "
-											+ error.getUnid();
+									msg = msg + "\n\nCould not retrieve document but UNID was passed: " + error.getUnid();
 								}
 							}
 							OpenLogItem.logErrorEx(error.getError(), msg, severity, passedDoc);
@@ -132,8 +139,7 @@ public class OpenLogPhaseListener implements PhaseListener {
 									Database currDb = ExtLibUtil.getCurrentDatabase();
 									passedDoc = currDb.getDocumentByUNID(eventObj.getUnid());
 								} catch (Exception e) {
-									msg = msg + "\n\nCould not retrieve document but UNID was passed: "
-											+ eventObj.getUnid();
+									msg = msg + "\n\nCould not retrieve document but UNID was passed: " + eventObj.getUnid();
 								}
 							}
 							OpenLogItem.logEvent(null, msg, severity, passedDoc);
@@ -153,8 +159,9 @@ public class OpenLogPhaseListener implements PhaseListener {
 	}
 
 	/**
-	 * This is getting VERY complex because of the variety of exceptions and tracking up the stack trace to find the
-	 * right class to get as much info as possible. Extracted into a separate method to make it more readable.
+	 * This is getting VERY complex because of the variety of exceptions and
+	 * tracking up the stack trace to find the right class to get as much info
+	 * as possible. Extracted into a separate method to make it more readable.
 	 * 
 	 * @param r
 	 *            requestScope map
@@ -166,15 +173,14 @@ public class OpenLogPhaseListener implements PhaseListener {
 		// Set the agent (page we're on) to the *previous* page
 		OpenLogItem.setThisAgent(false);
 
+		String msg = "";
 		if ("com.ibm.xsp.exception.EvaluationExceptionEx".equals(error.getClass().getName())) {
-			// EvaluationExceptionEx, so SSJS error is on a component property. 
+			// EvaluationExceptionEx, so SSJS error is on a component property.
 			// Hit by ErrorOnLoad.xsp
 			EvaluationExceptionEx ee = (EvaluationExceptionEx) error;
 			InterpretException ie = (InterpretException) ee.getCause();
-			String msg = "";
 			msg = "Error on " + ee.getErrorComponentId() + " " + ee.getErrorPropertyId() + " property/event, line "
-					+ Integer.toString(ie.getErrorLine()) + ":\n\n" + ie.getLocalizedMessage() + "\n\n"
-					+ ie.getExpressionText();
+					+ Integer.toString(ie.getErrorLine()) + ":\n\n" + ie.getLocalizedMessage() + "\n\n" + ie.getExpressionText();
 			OpenLogItem.logErrorEx(ee, msg, null, null);
 
 		} else if ("javax.faces.FacesException".equals(error.getClass().getName())) {
@@ -182,53 +188,78 @@ public class OpenLogPhaseListener implements PhaseListener {
 			FacesException fe = (FacesException) error;
 			InterpretException ie = null;
 			EvaluationExceptionEx ee = null;
-			String msg = "Error on ";
-			// javax.faces.el.MethodNotFoundException hit by ErrorOnMethod.xsp
-			if (!"javax.faces.el.MethodNotFoundException".equals(fe.getCause().getClass().getName())) {
-				if ("com.ibm.xsp.exception.EvaluationExceptionEx".equals(fe.getCause().getClass().getName())) {
-					// Hit by ErrorOnClick.xsp
-					ee = (EvaluationExceptionEx) fe.getCause();
-				} else if ("com.ibm.xsp.exception.EvaluationExceptionEx".equals(fe.getCause().getCause().getClass()
-						.getName())) {
-					// Hit by using e.g. currentDocument.isNewDoc()
-					// i.e. using a Variable that relates to a valid Java object but a method that doesn't exist
-					ee = (EvaluationExceptionEx) fe.getCause().getCause();
-				}
-				if (null != ee) {
-					msg = msg + ee.getErrorComponentId() + " " + ee.getErrorPropertyId() + " property/event:\n\n";
-					if ("com.ibm.jscript.InterpretException".equals(ee.getCause().getClass().getName())) {
-						ie = (InterpretException) ee.getCause();
+			msg = "Error on ";
+			try {
+				// javax.faces.el.MethodNotFoundException hit by
+				// ErrorOnMethod.xsp
+				if (!"javax.faces.el.MethodNotFoundException".equals(fe.getCause().getClass().getName())) {
+					if ("com.ibm.xsp.exception.EvaluationExceptionEx".equals(fe.getCause().getClass().getName())) {
+						// Hit by ErrorOnClick.xsp
+						ee = (EvaluationExceptionEx) fe.getCause();
+					} else if ("javax.faces.el.PropertyNotFoundException".equals(fe.getCause().getClass().getName())) {
+						// Property not found exception, so error is on a
+						// component property
+						msg = "PropertyNotFoundException Error, cannot locate component:\n\n";
+					} else if ("com.ibm.xsp.exception.EvaluationExceptionEx".equals(fe.getCause().getCause().getClass().getName())) {
+						// Hit by using e.g. currentDocument.isNewDoc()
+						// i.e. using a Variable that relates to a valid Java
+						// object but a method that doesn't exist
+						ee = (EvaluationExceptionEx) fe.getCause().getCause();
+					}
+					if (null != ee) {
+						msg = msg + ee.getErrorComponentId() + " " + ee.getErrorPropertyId() + " property/event:\n\n";
+						if ("com.ibm.jscript.InterpretException".equals(ee.getCause().getClass().getName())) {
+							ie = (InterpretException) ee.getCause();
+						}
 					}
 				}
+			} catch (Throwable t) {
+				msg = "Unexpected error class: " + fe.getCause().getClass().getName() + "\n Message recorded is: ";
 			}
 			if (null != ie) {
-				msg = msg + Integer.toString(ie.getErrorLine()) + ":\n\n" + ie.getLocalizedMessage() + "\n\n"
-						+ ie.getExpressionText();
+				msg = msg + Integer.toString(ie.getErrorLine()) + ":\n\n" + ie.getLocalizedMessage() + "\n\n" + ie.getExpressionText();
 			} else {
 				msg = msg + fe.getCause().getLocalizedMessage();
 			}
 			OpenLogItem.logErrorEx(fe.getCause(), msg, null, null);
 		} else if ("com.ibm.xsp.FacesExceptionEx".equals(error.getClass().getName())) {
-			// FacesException, so error is on event - doesn't get hit in examples. Can this still get hit??
+			// FacesException, so error is on event - doesn't get hit in
+			// examples. Can this still get hit??
 			FacesExceptionEx fe = (FacesExceptionEx) error;
-			EvaluationExceptionEx ee = (EvaluationExceptionEx) fe.getCause();
-			InterpretException ie = (InterpretException) ee.getCause();
-			String msg = "";
-			msg = "Error on " + ee.getErrorComponentId() + " " + ee.getErrorPropertyId() + " property/event:\n\n"
-					+ Integer.toString(ie.getErrorLine()) + ":\n\n" + ie.getLocalizedMessage() + "\n\n"
-					+ ie.getExpressionText();
-			OpenLogItem.logErrorEx(ee, msg, null, null);
+			try {
+				if ("lotus.domino.NotesException".equals(fe.getCause().getClass().getName())) {
+					// sometimes the cause is a NotesException
+					NotesException ne = (NotesException) fe.getCause();
+
+					msg = msg + "NotesException - " + Integer.toString(ne.id) + " " + ne.text;
+				} else if ("java.io.IOException".equals(error.getClass().getName())) {
+					IOException e = (IOException) error;
+
+					msg = "Java IO:" + error.toString();
+					OpenLogItem.logErrorEx(e.getCause(), msg, null, null);
+				} else {
+					EvaluationExceptionEx ee = (EvaluationExceptionEx) fe.getCause();
+					InterpretException ie = (InterpretException) ee.getCause();
+
+					msg = "Error on " + ee.getErrorComponentId() + " " + ee.getErrorPropertyId() + " property/event:\n\n"
+							+ Integer.toString(ie.getErrorLine()) + ":\n\n" + ie.getLocalizedMessage() + "\n\n" + ie.getExpressionText();
+				}
+			} catch (Throwable t) {
+				msg = "Unexpected error class: " + fe.getCause().getClass().getName() + "\n Message recorded is: "
+						+ fe.getCause().getLocalizedMessage();
+				;
+			}
+			OpenLogItem.logErrorEx(fe.getCause(), msg, null, null);
+
 		} else if ("javax.faces.el.PropertyNotFoundException".equals(error.getClass().getName())) {
 			// Hit by ErrorOnProperty.xsp
 			// Property not found exception, so error is on a component property
 			PropertyNotFoundException pe = (PropertyNotFoundException) error;
-			String msg = "";
 			msg = "PropertyNotFoundException Error, cannot locate component:\n\n" + pe.getLocalizedMessage();
 			OpenLogItem.logErrorEx(pe, msg, null, null);
 		} else {
 			try {
 				System.out.println("Error type not found:" + error.getClass().getName());
-				String msg = "";
 				msg = error.toString();
 				OpenLogItem.logErrorEx((Throwable) error, msg, null, null);
 			} catch (Throwable t) {

@@ -32,8 +32,10 @@ import com.ibm.jscript.InterpretException;
  */
 public class OpenLogErrorHolder implements Serializable {
 
-	// Changed from using TreeSet because there is a bug with that. If compareTo returns 0, because it implements TreeMap,
-	//it can still consider them equal, and ignore them - http://blog.tremend.ro/2007/05/17/problem-when-adding-elements-to-a-treesetcomparator-some-elements-are-not-added/
+	// Changed from using TreeSet because there is a bug with that. If compareTo
+	// returns 0, because it implements TreeMap,
+	// it can still consider them equal, and ignore them -
+	// http://blog.tremend.ro/2007/05/17/problem-when-adding-elements-to-a-treesetcomparator-some-elements-are-not-added/
 	private LinkedHashSet<EventError> errors;
 	private LinkedHashSet<EventError> events;
 	private LinkedHashSet<EventError> loggedErrors = null;
@@ -43,18 +45,36 @@ public class OpenLogErrorHolder implements Serializable {
 
 	}
 
+	/**
+	 * LinkedHashSet (array of EventError objects in the order they were
+	 * inserted)
+	 * 
+	 * @return LinkedHashSet Errors or Events as a list
+	 */
 	public LinkedHashSet<EventError> getErrors() {
 		return errors;
 	}
 
+	/**
+	 * Loads a list of EventError objects, see {@link #getErrors()}
+	 * 
+	 * @return LinkedHashSet
+	 */
 	public LinkedHashSet<EventError> getEvents() {
 		return events;
 	}
 
+	/**
+	 * @return LinkedHashSet of current logged EventError objects
+	 */
 	public LinkedHashSet<EventError> getLoggedErrors() {
 		return errors;
 	}
 
+	/**
+	 * @param loggedErrors
+	 *            LinkedHashSet of EventError objects to add to the log
+	 */
 	public void setLoggedErrors(LinkedHashSet<EventError> loggedErrors) {
 		this.loggedErrors = loggedErrors;
 	}
@@ -72,8 +92,7 @@ public class OpenLogErrorHolder implements Serializable {
 	 *            document error is related to
 	 * @return
 	 */
-	private EventError createEventError(InterpretException ie, String msg, UIComponent control, int severity,
-			String unid) {
+	private EventError createEventError(InterpretException ie, String msg, UIComponent control, int severity, String unid) {
 		EventError newErr = new EventError();
 		newErr.setError(ie);
 		newErr.setMsg(msg);
@@ -102,18 +121,22 @@ public class OpenLogErrorHolder implements Serializable {
 
 	/**
 	 * @param ie
-	 *            InterpretException thrown from SSJS. In SSJS, add a try...catch block.<br/>
+	 *            InterpretException thrown from SSJS. In SSJS, add a
+	 *            try...catch block.<br/>
 	 *            The "catch" element passes an InterpretException.
 	 * @param control
-	 *            Component the error occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the error occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * @param severity
-	 *            Integer severity level from 1 to 7, corresponding to java.util.logging Levels. 1 is severe, 7 is
-	 *            finest.
+	 *            Integer severity level from 1 to 7, corresponding to
+	 *            java.util.logging Levels. 1 is severe, 7 is finest.
 	 * @param unid
-	 *            This object is serializable to requestScope. But for safety, it shouldn't include Domino objects. The
-	 *            code will look for the document in the current database. If it can't be found, we won't be able to get
-	 *            the document. So instead we'll just write out the UNID in the error message.
+	 *            This object is serializable to requestScope. But for safety,
+	 *            it shouldn't include Domino objects. The code will look for
+	 *            the document in the current database. If it can't be found, we
+	 *            won't be able to get the document. So instead we'll just write
+	 *            out the UNID in the error message.
 	 * 
 	 *            <pre>
 	 * try {
@@ -137,14 +160,16 @@ public class OpenLogErrorHolder implements Serializable {
 
 	/**
 	 * @param ie
-	 *            InterpretException thrown from SSJS. In SSJS, add a try...catch block.<br/>
+	 *            InterpretException thrown from SSJS. In SSJS, add a
+	 *            try...catch block.<br/>
 	 *            The "catch" element passes an InterpretException.
 	 * @param control
-	 *            Component the error occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the error occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * @param severity
-	 *            Integer severity level from 1 to 7, corresponding to java.util.logging Levels. 1 is severe, 7 is
-	 *            finest.
+	 *            Integer severity level from 1 to 7, corresponding to
+	 *            java.util.logging Levels. 1 is severe, 7 is finest.
 	 * 
 	 *            EXAMPLE
 	 * 
@@ -170,11 +195,13 @@ public class OpenLogErrorHolder implements Serializable {
 
 	/**
 	 * @param ie
-	 *            InterpretException thrown from SSJS. In SSJS, add a try...catch block.<br/>
+	 *            InterpretException thrown from SSJS. In SSJS, add a
+	 *            try...catch block.<br/>
 	 *            The "catch" element passes an InterpretException.
 	 * @param control
-	 *            Component the error occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the error occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * 
 	 *            EXAMPLE
 	 * 
@@ -200,20 +227,24 @@ public class OpenLogErrorHolder implements Serializable {
 
 	/**
 	 * @param ie
-	 *            InterpretException thrown from SSJS. In SSJS, add a try...catch block.<br/>
+	 *            InterpretException thrown from SSJS. In SSJS, add a
+	 *            try...catch block.<br/>
 	 *            The "catch" element passes an InterpretException.
 	 * @param msg
 	 *            An additional message to pass to OpenLog.
 	 * @param control
-	 *            Component the error occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the error occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * @param severity
-	 *            Integer severity level from 1 to 7, corresponding to java.util.logging Levels. 1 is severe, 7 is
-	 *            finest.
+	 *            Integer severity level from 1 to 7, corresponding to
+	 *            java.util.logging Levels. 1 is severe, 7 is finest.
 	 * @param unid
-	 *            This object is serializable to requestScope. But for safety, it shouldn't include Domino objects. The
-	 *            code will look for the document in the current database. If it can't be found, we won't be able to get
-	 *            the document. So instead we'll just write out the UNID in the error message.
+	 *            This object is serializable to requestScope. But for safety,
+	 *            it shouldn't include Domino objects. The code will look for
+	 *            the document in the current database. If it can't be found, we
+	 *            won't be able to get the document. So instead we'll just write
+	 *            out the UNID in the error message.
 	 * 
 	 *            EXAMPLE
 	 * 
@@ -239,16 +270,18 @@ public class OpenLogErrorHolder implements Serializable {
 
 	/**
 	 * @param ie
-	 *            InterpretException thrown from SSJS. In SSJS, add a try...catch block.<br/>
+	 *            InterpretException thrown from SSJS. In SSJS, add a
+	 *            try...catch block.<br/>
 	 *            The "catch" element passes an InterpretException.
 	 * @param msg
 	 *            An additional message to pass to OpenLog.
 	 * @param control
-	 *            Component the error occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the error occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * @param severity
-	 *            Integer severity level from 1 to 7, corresponding to java.util.logging Levels. 1 is severe, 7 is
-	 *            finest.
+	 *            Integer severity level from 1 to 7, corresponding to
+	 *            java.util.logging Levels. 1 is severe, 7 is finest.
 	 * 
 	 *            EXAMPLE
 	 * 
@@ -274,13 +307,15 @@ public class OpenLogErrorHolder implements Serializable {
 
 	/**
 	 * @param ie
-	 *            InterpretException thrown from SSJS. In SSJS, add a try...catch block.<br/>
+	 *            InterpretException thrown from SSJS. In SSJS, add a
+	 *            try...catch block.<br/>
 	 *            The "catch" element passes an InterpretException.
 	 * @param msg
 	 *            An additional message to pass to OpenLog.
 	 * @param control
-	 *            Component the error occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the error occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * 
 	 *            EXAMPLE
 	 * 
@@ -322,15 +357,18 @@ public class OpenLogErrorHolder implements Serializable {
 	 * @param msg
 	 *            String message to pass to the event logger
 	 * @param control
-	 *            Component the error occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the error occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * @param severity
-	 *            Integer severity level from 1 to 7, corresponding to java.util.logging Levels. 1 is severe, 7 is
-	 *            finest
+	 *            Integer severity level from 1 to 7, corresponding to
+	 *            java.util.logging Levels. 1 is severe, 7 is finest
 	 * @param unid
-	 *            This object is serializable to requestScope. But for safety, it shouldn't include Domino objects. The
-	 *            code will look for the document in the current database. If it can't be found, we won't be able to get
-	 *            the document. So instead we'll just write out the UNID in the error message.
+	 *            This object is serializable to requestScope. But for safety,
+	 *            it shouldn't include Domino objects. The code will look for
+	 *            the document in the current database. If it can't be found, we
+	 *            won't be able to get the document. So instead we'll just write
+	 *            out the UNID in the error message.
 	 * 
 	 *            EXAMPLE
 	 * 
@@ -357,11 +395,12 @@ public class OpenLogErrorHolder implements Serializable {
 	 * @param msg
 	 *            String message to pass to the event logger
 	 * @param control
-	 *            Component the error occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the error occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * @param severity
-	 *            Integer severity level from 1 to 7, corresponding to java.util.logging Levels. 1 is severe, 7 is
-	 *            finest.
+	 *            Integer severity level from 1 to 7, corresponding to
+	 *            java.util.logging Levels. 1 is severe, 7 is finest.
 	 * 
 	 *            EXAMPLE
 	 * 
@@ -388,8 +427,9 @@ public class OpenLogErrorHolder implements Serializable {
 	 * @param msg
 	 *            String message to pass to the event logger
 	 * @param control
-	 *            Component the event occurred on. To avoid hard-coding the control, use "this" in a property or
-	 *            "this.getParent()" in an event:
+	 *            Component the event occurred on. To avoid hard-coding the
+	 *            control, use "this" in a property or "this.getParent()" in an
+	 *            event:
 	 * 
 	 *            EXAMPLE:
 	 * 
@@ -441,21 +481,32 @@ public class OpenLogErrorHolder implements Serializable {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj) return true;
-			if (obj == null) return false;
-			if (getClass() != obj.getClass()) return false;
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
 			EventError other = (EventError) obj;
-			if (!getOuterType().equals(other.getOuterType())) return false;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
 			if (control == null) {
-				if (other.control != null) return false;
-			} else if (!control.equals(other.control)) return false;
+				if (other.control != null)
+					return false;
+			} else if (!control.equals(other.control))
+				return false;
 			if (msg == null) {
-				if (other.msg != null) return false;
-			} else if (!msg.equals(other.msg)) return false;
-			if (severity != other.severity) return false;
+				if (other.msg != null)
+					return false;
+			} else if (!msg.equals(other.msg))
+				return false;
+			if (severity != other.severity)
+				return false;
 			if (unid == null) {
-				if (other.unid != null) return false;
-			} else if (!unid.equals(other.unid)) return false;
+				if (other.unid != null)
+					return false;
+			} else if (!unid.equals(other.unid))
+				return false;
 
 			String srcMsg = "";
 			String srcText = "";
@@ -544,7 +595,8 @@ public class OpenLogErrorHolder implements Serializable {
 	 *            error to be added to facesMessage
 	 */
 	public void addFacesMessageForError(EventError newErr) {
-		// Quit if getLoggedErrors() is null. Will be initialised during beforePhase of renderResponse
+		// Quit if getLoggedErrors() is null. Will be initialised during
+		// beforePhase of renderResponse
 		if (null == loggedErrors) {
 			return;
 		}
