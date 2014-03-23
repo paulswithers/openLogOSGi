@@ -52,7 +52,6 @@ public class OpenLogPhaseListener implements PhaseListener {
 	@SuppressWarnings("unchecked")
 	public void beforePhase(PhaseEvent event) {
 		// Add FacesContext messages for anything captured so far
-		System.out.println(this.getClass().getName() + ": " + event.getPhaseId().toString());
 		if (RENDER_RESPONSE == event.getPhaseId().getOrdinal()) {
 			Map<String, Object> r = FacesContext.getCurrentInstance().getExternalContext().getRequestMap();
 			if (null == r.get("error")) {
